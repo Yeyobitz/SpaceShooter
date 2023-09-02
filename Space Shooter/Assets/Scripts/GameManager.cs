@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
             SceneManager.LoadScene(1); //works in unity 5 and 2017
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && _isGameOver == true)
         {
             Application.Quit();
         }

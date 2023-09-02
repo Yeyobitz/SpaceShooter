@@ -19,6 +19,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private float _speedPowerUp;
 
+    private Animator _animator;  // Agrega esta referencia
+
     [SerializeField]
     private GameObject _shieldVisualizer;
     [SerializeField]
@@ -31,7 +33,7 @@ public class Player : MonoBehaviour
     private bool _isShieldActive = false;
 
     [SerializeField]
-    public int _score;
+    public int _score = 0;
 
     [SerializeField]
     private UIManager _uiManager;
@@ -39,11 +41,20 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioClip _laserSoundClip;
 
+    private float _keyPressStartTime = 0.0f;
+
+
     void Start()
     {
         transform.position = new Vector3(0, 0, 0);
 
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
+        _animator = GetComponent<Animator>();  // Inicializa la referencia al Animator
+
+        if (_animator == null)
+        {
+            Debug.LogError("The Animator is NULL.");
+        }
 
         if (_spawnManager == null)
         {
@@ -61,6 +72,26 @@ public class Player : MonoBehaviour
     {
         CalculateMovement();
 
+        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            _keyPressStartTime = Time.time;
+        }
+
+        if (Input.GetKey(KeyCode.RightArrow))
+        {
+            float timePressed = Time.time - _keyPressStartTime;
+            _animator.SetFloat("MoveSpeed", Mathf.Clamp(timePressed, 0f, 1f));
+        }
+        else if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            float timePressed = Time.time - _keyPressStartTime;
+            _animator.SetFloat("MoveSpeed", -Mathf.Clamp(timePressed, 0f, 1f));
+        }
+        else
+        {
+            _animator.SetFloat("MoveSpeed", 0f);
+        }
+
         if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
         {
             FireLaser();
@@ -70,6 +101,7 @@ public class Player : MonoBehaviour
     void CalculateMovement()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
+
         float verticalInput = Input.GetAxis("Vertical");
 
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0);
@@ -92,6 +124,7 @@ public class Player : MonoBehaviour
         {
             transform.position = new Vector3(9.72f, transform.position.y, 0);
         }
+
     }
 
     void FireLaser()
